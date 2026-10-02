@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Samrat & Kajal Wedding Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Rozha+One&family=Yatra+One&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --maroon: #80182a;
+      --gold: #d4af37;
+      --cream: #fffaf0;
+      --dark: #2c2523;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #f7efe5;
+      font-family: 'Tiro Devanagari Hindi', serif;
+      color: var(--dark);
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+    }
+    #petals-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none !important;
+      z-index: 10;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: var(--cream);
+      box-shadow: 0 0 25px rgba(0,0,0,0.15);
+      position: relative;
+      padding-bottom: 30px;
+    }
+
+    /* Envelope Overlay */
+    .envelope-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 10, 15, 0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+    }
+    .envelope-screen.opened {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .envelope-container {
+      position: relative;
+      width: 290px;
+      height: 200px;
+      background: var(--maroon);
+      border-radius: 6px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 145px solid transparent;
+      border-right: 145px solid transparent;
+      border-top: 110px solid #631220;
+      transform-origin: top center;
+      transition: transform 0.5s ease;
+      z-index: 2;
+    }
+    .envelope-flap.flip {
+      transform: rotateX(180deg);
+    }
+    .envelope-seal {
+      position: absolute;
+      top: 70px;
+      width: 68px;
+      height: 68px;
+      background: radial-gradient(circle, #ffe17d 0%, #b8860b 100%);
+      border-radius: 50%;
+      border: 2px solid #5c0612;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5c0612;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      z-index: 5;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .tap-hint {
+      color: #f7d58b;
+      margin-top: 35px;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+
+    /* Content Styling */
+    .header-banner {
+      text-align: center;
+      padding: 25px 20px 10px;
+      border-bottom: 2px dashed var(--gold);
+    }
+    .ganesh-icon {
+      width: 78px;
+      height: 78px;
+      object-fit: contain;
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(128, 24, 42, 0.2));
+    }
+    .mantra {
+      font-size: 0.85rem;
+      color: var(--maroon);
+      line-height: 1.6;
+    }
+    .title-sub {
+      font-family: 'Rozha One', serif;
+      font-size: 1.6rem;
+      color: var(--maroon);
+      margin: 15px 0 5px;
+    }
+    .names-section {
+      text-align: center;
+      padding: 25px 20px;
+    }
+    .bride-groom {
+      font-family: 'Rozha One', serif;
+      font-size: 2rem;
+      color: var(--maroon);
+    }
+    .relation-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #555;
+      margin: 8px 0;
+    }
+
+    /* Short Maroon Scratch Countdown Section */
+    .scratch-wrapper {
+      position: relative;
+      margin: 15px 20px;
+      height: 110px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      touch-action: none;
+    }
+    .countdown-box {
+      width: 100%;
+      height: 100%;
+      padding: 12px 10px;
+      background: #fff;
+      border: 1px solid #ebd39b;
+      border-radius: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    #scratchCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      touch-action: none;
+      cursor: pointer;
+      transition: opacity 0.5s ease;
+    }
+    .timer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .time-slot {
+      background: #fdf5ea;
+      padding: 4px 2px;
+      border-radius: 6px;
+      border: 1px solid #fae4c3;
+    }
+    .time-slot span {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--maroon);
+      line-height: 1.2;
+    }
+    .time-slot label {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      color: #777;
+    }
+
+    /* Continuous Interactive Function Cards */
+    .events-wrapper {
+      padding: 10px 20px;
+    }
+    .event-card {
+      background: #fff;
+      border: 1px solid #ebd39b;
+      border-radius: 14px;
+      padding: 22px 18px;
+      margin-bottom: 22px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      opacity: 0;
+      transform: translateY(45px) scale(0.92);
+      transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .event-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .event-title {
+      font-family: 'Rozha One', serif;
+      font-size: 1.35rem;
+      color: var(--maroon);
+      margin-bottom: 6px;
+      opacity: 0;
+      transform: translateY(-12px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .event-card.visible .event-title {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.15s;
+    }
+    .event-timing {
+      font-weight: bold;
+      color: #6d4c41;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      display: inline-block;
+      padding: 4px 14px;
+      background: #fdf5ea;
+      border-radius: 20px;
+      border: 1px dashed var(--gold);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .event-card.visible .event-timing {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 0.25s;
+    }
+    .btn-directions {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 9px 24px;
+      background: linear-gradient(135deg, #a61c33 0%, #80182a 100%);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-radius: 25px;
+      box-shadow: 0 3px 8px rgba(128, 24, 42, 0.3);
+    }
+
+    /* 16:9 Landscape Carousel (1920x1080) */
+    .carousel-section {
+      padding: 15px 20px;
+      text-align: center;
+    }
+    .carousel-slide {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 3px solid #ebd39b;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    /* WhatsApp RSVP Form */
+    .rsvp-box {
+      margin: 10px 20px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ebd39b;
+      border-radius: 12px;
+    }
+    .rsvp-box h3 {
+      text-align: center;
+      font-family: 'Rozha One', serif;
+      color: var(--maroon);
+      margin-bottom: 12px;
+    }
+    .rsvp-form label {
+      display: block;
+      font-size: 0.85rem;
+      margin: 8px 0 4px;
+    }
+    .rsvp-form input, .rsvp-form select {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    .rsvp-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 11px;
+      background: var(--maroon);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Family Details */
+    .family-credits {
+      padding: 20px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      text-align: center;
+      background: #fdf5ea;
+      margin: 10px 20px;
+      border-radius: 10px;
+    }
+
+    /* Footer */
+    .invitation-footer {
+      margin-top: 25px;
+      padding: 30px 20px;
+      background: linear-gradient(180deg, #fdf5ea 0%, #faecd7 100%);
+      border-top: 2px dashed var(--gold);
+      text-align: center;
+    }
+    .footer-couple {
+      font-family: 'Rozha One', serif;
+      font-size: 1.8rem;
+      color: var(--maroon);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+    .footer-tagline {
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #8a641d;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="petals-canvas"></canvas>
+
+  <div class="envelope-screen" id="envelopeScreen" onclick="openInvite()">
+    <div class="envelope-container">
+      <div class="envelope-flap" id="envelopeFlap"></div>
+      <div class="envelope-seal">S & K</div>
+    </div>
+    <div class="tap-hint">निमंत्रण खोलने हेतु कहीं भी टच करें</div>
+  </div>
+
+  <div class="wrapper">
+    <header class="header-banner">
+      <img src="ganesha.png" alt="Shree Ganesh" class="ganesh-icon" />
+      <p class="mantra">।। ॐ श्री गणेशाय नमः ।।<br>वक्रतुण्ड महाकाय, सूर्यकोटि समप्रभः ।<br>निर्विघ्नं कुरुमे देव, सर्व कार्येषु सर्वदा ।।</p>
+      <h2 class="title-sub">शुभ विवाह</h2>
+    </header>
+
+    <section class="names-section">
+      <h1 class="bride-groom">चि. सम्राट</h1>
+      <div class="relation-text">
+        सुपौत्र-स्व. श्री ताराचंद उपवंशी<br>सुपुत्र-श्री रतनलाल उपवंशी<br>(ग्राम-आंवलाझरी, बालाघाट)
+      </div>
+      <div style="font-size: 1.5rem; margin: 8px 0; color: var(--gold);">संग</div>
+      <h1 class="bride-groom">सौ. कां. काजल</h1>
+      <div class="relation-text">
+        सुपौत्री-स्व. श्री जैराम देशमुख<br>सुपुत्री-श्री गणेशप्रसाद देशमुख<br>(ग्राम-पनबिहरी, लालबर्रा)
+      </div>
+    </section>
+
+    <!-- Short Maroon Scratch Countdown -->
+    <div class="scratch-wrapper" id="scratchWrapper">
+      <canvas id="scratchCanvas"></canvas>
+      <section class="countdown-box">
+        <p style="font-size: 0.8rem; color: #666; font-weight: bold;">विवाह उत्सव प्रारंभ होने में शेष समय</p>
+        <div class="timer-grid">
+          <div class="time-slot"><span id="days">00</span><label>Days</label></div>
+          <div class="time-slot"><span id="hours">00</span><label>Hours</label></div>
+          <div class="time-slot"><span id="minutes">00</span><label>Mins</label></div>
+          <div class="time-slot"><span id="seconds">00</span><label>Secs</label></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Functions Schedule -->
+    <section class="events-wrapper">
+      <div class="event-card">
+        <h3 class="event-title">सगाई (Engagement)</h3>
+        <span class="event-timing">01 दिसम्बर 2026, मंगलवार</span>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebd39b;" />
+        <p style="font-size: 0.95rem; font-weight: bold; color: var(--maroon);">कार्यक्रम स्थल:</p>
+        <p style="font-size: 0.85rem;">प्रशान्ति मैरिज लॉन, बालाघाट रोड, मानपुर, लालबर्रा</p>
+        <a class="btn-directions" href="https://maps.google.com/?q=Prashanti+Marriage+Lawn+Lalbarra+Balaghat" target="_blank">Get Directions</a>
+      </div>
+
+      <div class="event-card">
+        <h3 class="event-title">मण्डपाच्छादन, हल्दी एवं संगीत</h3>
+        <span class="event-timing">02 दिसम्बर 2026, बुधवार</span>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebd39b;" />
+        <p style="font-size: 0.95rem; font-weight: bold; color: var(--maroon);">कार्यक्रम स्थल:</p>
+        <p style="font-size: 0.85rem;">वार्ड नं. 20, आंवलाझरी</p>
+        <a class="btn-directions" href="https://maps.google.com/?q=Ward+No+20+Aonlajhari+Balaghat" target="_blank">Get Directions</a>
+      </div>
+
+      <div class="event-card">
+        <h3 class="event-title">पाणिग्रहण संस्कार (लग्न)</h3>
+        <span class="event-timing">03 दिसम्बर 2026, गुरुवार | शाम 6:30 बजे</span>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebd39b;" />
+        <p style="font-size: 0.95rem; font-weight: bold; color: var(--maroon);">विवाह स्थल:</p>
+        <p style="font-size: 0.85rem;">प्रशान्ति मैरिज लॉन, बालाघाट रोड, मानपुर, लालबर्रा</p>
+        <a class="btn-directions" href="https://maps.google.com/?q=Prashanti+Marriage+Lawn+Lalbarra+Balaghat" target="_blank">Get Directions</a>
+      </div>
+
+      <div class="event-card">
+        <h3 class="event-title">शुभ आशीर्वाद एवं प्रीतिभोज (Reception)</h3>
+        <span class="event-timing">04 दिसम्बर 2026, शुक्रवार</span>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #ebd39b;" />
+        <p style="font-size: 0.95rem; font-weight: bold; color: var(--maroon);">कार्यक्रम स्थल:</p>
+        <p style="font-size: 0.85rem;">शालिनी मेरिज लॉन, भटेरा</p>
+        <a class="btn-directions" href="https://maps.google.com/?q=Shalini+Marriage+Lawn+Bhatera+Balaghat" target="_blank">Get Directions</a>
+      </div>
+    </section>
+
+    <!-- 16:9 Landscape Carousel (1920x1080) -->
+    <section class="carousel-section">
+      <div class="carousel-slide" id="photoSlide" style="background-image: url('photo1.jpg');"></div>
+      <p style="font-size: 0.8rem; color: #777; margin-top: 6px;">Tap photo to see next</p>
+    </section>
+
+    <!-- WhatsApp RSVP Form -->
+    <section class="rsvp-box">
+      <h3>RSVP</h3>
+      <form class="rsvp-form" id="rsvpForm">
+        <label>आपका नाम (Full Name)</label>
+        <input type="text" id="guestName" required placeholder="अपना नाम लिखें" />
+
+        <label>कुल सदस्य (Guests Count)</label>
+        <select id="guestCount">
+          <option value="1">1 सदस्य</option>
+          <option value="2">2 सदस्य</option>
+          <option value="3">3 सदस्य</option>
+          <option value="4+">4+ सदस्य</option>
+        </select>
+
+        <label>उपस्थिति (Will you attend?)</label>
+        <select id="guestAttendance">
+          <option value="हाँ, हम सहपरिवार ज़रूर उपस्थित होंगे।">हाँ, हम सहपरिवार ज़रूर उपस्थित होंगे</option>
+          <option value="क्षमा करें, उपस्थित नहीं हो सकेंगे।">क्षमा करें, उपस्थित नहीं हो सकेंगे</option>
+        </select>
+
+        <button type="submit" class="rsvp-btn">
+          <span>📲 Send RSVP via WhatsApp</span>
+        </button>
+      </form>
+    </section>
+
+    <div class="family-credits">
+      <strong>दर्शनाभिलाषी:</strong><br>
+      श्री संपत उपवंशी, श्री चैनलाल उपवंशी एवं समस्त उपवंशी परिवार<br><br>
+      <strong>स्वागताकांक्षी:</strong><br>
+      श्री धनेन्द्र नगपुरे, श्री किशोर नगपुरे एवं समस्त रिश्तेदार<br><br>
+      <strong>विनीत:</strong><br>
+      श्रीमती सैवंती-श्री रतनलाल उपवंशी
+    </div>
+
+    <!-- Footer -->
+    <footer class="invitation-footer">
+      <h2 class="footer-couple">सम्राट संग काजल</h2>
+      <p class="footer-coupl">✨ सहपरिवार पधारकर वर वधू को आशीर्वाद प्रदान करे ✨</p>
+    </footer>
+  </div>
+
+  <script>
+    // Envelope Interaction
+    const screen = document.getElementById('envelopeScreen');
+    const flap = document.getElementById('envelopeFlap');
+    let isOpening = false;
+
+    function openInvite() {
+      if (isOpening) return;
+      isOpening = true;
+      flap.classList.add('flip');
+      setTimeout(() => {
+        screen.classList.add('opened');
+        initScratchCard();
+      }, 450);
+    }
+
+    screen.addEventListener('click', openInvite);
+    screen.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      openInvite();
+    });
+
+    // Countdown Timer (Engagement target: Dec 1, 2026)
+    const targetDate = new Date('2026-12-01T10:00:00+05:30').getTime();
+    setInterval(() => {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+      if (diff > 0) {
+        document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+        document.getElementById('hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+        document.getElementById('minutes').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+        document.getElementById('seconds').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+      }
+    }, 1000);
+
+    // Maroon Scratch Card: Tap & Pointer Drag Based
+    function initScratchCard() {
+      const wrapper = document.getElementById('scratchWrapper');
+      const canvas = document.getElementById('scratchCanvas');
+      if (!wrapper || !canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = wrapper.offsetWidth;
+      canvas.height = wrapper.offsetHeight;
+
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, '#8b1e32');
+      grad.addColorStop(0.5, '#6a1120');
+      grad.addColorStop(1, '#4e0a15');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#fce59f';
+      ctx.font = 'bold 14px "Tiro Devanagari Hindi", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✨ यहाँ स्क्रैच करें ✨', canvas.width / 2, canvas.height / 2);
+
+      let interactionCount = 0;
+      let cleared = false;
+      let isPointerDown = false;
+
+      function clearFully() {
+        if (cleared) return;
+        cleared = true;
+        canvas.style.opacity = '0';
+        setTimeout(() => { canvas.style.display = 'none'; }, 500);
+      }
+
+      function eraseAt(x, y) {
+        if (cleared) return;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 36, 0, Math.PI * 2);
+        ctx.fill();
+
+        interactionCount++;
+        if (interactionCount >= 4) {
+          clearFully();
+        }
+      }
+
+      function handlePointer(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        eraseAt(x, y);
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        isPointerDown = true;
+        canvas.setPointerCapture(e.pointerId);
+        handlePointer(e);
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!isPointerDown) return;
+        handlePointer(e);
+      });
+
+      canvas.addEventListener('pointerup', (e) => {
+        isPointerDown = false;
+        try { canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+      });
+
+      canvas.addEventListener('pointercancel', () => {
+        isPointerDown = false;
+      });
+    }
+
+    // Continuous Scroll Observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, {
+      threshold: 0.15
+    });
+
+    document.querySelectorAll('.event-card').forEach(card => observer.observe(card));
+
+    // Photo Carousel (1920x1080)
+    const photos = [
+      'photo1.jpg',
+      'photo2.jpg',
+      'photo3.jpg'
+    ];
+    let photoIdx = 0;
+    const slideElem = document.getElementById('photoSlide');
+    if (slideElem) {
+      slideElem.addEventListener('click', () => {
+        photoIdx = (photoIdx + 1) % photos.length;
+        slideElem.style.backgroundImage = `url('${photos[photoIdx]}')`;
+      });
+    }
+
+    // WhatsApp RSVP Redirect (+91-8319601616)
+    const rsvpFormElem = document.getElementById('rsvpForm');
+    if (rsvpFormElem) {
+      rsvpFormElem.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('guestName').value.trim();
+        const count = document.getElementById('guestCount').value;
+        const attendance = document.getElementById('guestAttendance').value;
+
+        const message = `*।। शुभ विवाह निमंत्रण RSVP ।।*\n\n` +
+                        `नमस्ते सम्राट जी,\n` +
+                        `*अतिथि का नाम:* ${name}\n` +
+                        `*उपस्थिति:* ${attendance}\n` +
+                        `*कुल सदस्य:* ${count}\n\n` +
+                        `हार्दिक शुभकामनाएं!`;
+
+        const whatsappURL = `https://wa.me/918319601616?text=${encodeURIComponent(message)}`;
+        window.open(whatsappURL, '_blank');
+      });
+    }
+
+    // Petals Background
+    const canvas = document.getElementById('petals-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const petals = Array.from({ length: 22 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 6 + 6,
+      speedX: Math.random() * 1.2 - 0.6,
+      speedY: Math.random() * 1.4 + 0.8,
+      angle: Math.random() * 360
+    }));
+
+    function drawPetals() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(215, 65, 85, 0.55)';
+      petals.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle * Math.PI / 180);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        p.y += p.speedY;
+        p.x += p.speedX;
+        p.angle += 0.8;
+        if (p.y > height) { p.y = -10; p.x = Math.random() * width; }
+      });
+      requestAnimationFrame(drawPetals);
+    }
+    drawPetals();
+  </script>
+</body>
+</html>
